@@ -620,10 +620,41 @@ class CommentReader(ReaderHandler):
         read_inner(rdr, True, always_return_form=True)
         return rdr
 
+class RegexReader(ReaderHandler):
+    def invoke(self, rdr, ch):
+        regex_str  = LiteralStringReader().invoke(rdr, ch)
+        regex_opts = EMPTY_SET
+        opts_dict  = {
+            u"a": keyword(u"ascii"),
+            u"p": keyword(u"posix"),
+            u"l": keyword(u"longest_match"),
+            u"s": keyword(u"silent"),
+            u"L": keyword(u"literal"),
+            u"n": keyword(u"never_nl"),
+            u"m": keyword(u"dot_nl"),
+            u"c": keyword(u"never_capture"),
+            u"i": keyword(u"ignore_case")
+        }
+
+        # read options (https://github.com/google/re2/blob/master/re2/re2.h#L517)
+        while True:
+            try:
+                opt = opts_dict.get(rdr.read(), None)
+                if opt is None:
+                    rdr.unread()
+                    break
+                else:
+                    regex_opts = regex_opts.conj(opt)
+            except EOFError:
+                break
+
+        return rt.cons(symbol(u"re2"), rt.cons(regex_str, rt.cons(regex_opts, nil)))
+
 dispatch_handlers = {
     u"{": SetReader(),
     u"(": FnReader(),
-    u"_": CommentReader()
+    u"_": CommentReader(),
+    u"\"": RegexReader()
 }
 
 class DispatchReader(ReaderHandler):
