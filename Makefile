@@ -41,7 +41,7 @@ compile_basics:
 build: fetch_externals
 	$(PYTHON) $(EXTERNALS)/pypy/rpython/bin/rpython $(COMMON_BUILD_OPTS) $(JIT_OPTS) $(TARGET_OPTS)
 
-fetch_externals: $(EXTERNALS)/pypy externals.fetched
+fetch_externals: $(EXTERNALS)/pypy $(EXTERNALS)/cre2 externals.fetched
 
 externals.fetched:
 	echo https://github.com/pixie-lang/external-deps/releases/download/1.0/`uname -s`-`uname -m`.tar.bz2
@@ -49,14 +49,29 @@ externals.fetched:
 	tar -jxf /tmp/externals.tar.bz2 --strip-components=2
 	touch externals.fetched
 
-
-$(EXTERNALS)/pypy:
-	mkdir $(EXTERNALS); \
+$(EXTERNALS)/pypy: $(EXTERNALS)
 	cd $(EXTERNALS); \
 	curl https://bitbucket.org/pypy/pypy/get/81254.tar.bz2 >  pypy.tar.bz2; \
 	mkdir pypy; \
 	cd pypy; \
 	tar -jxf ../pypy.tar.bz2 --strip-components=1
+
+$(EXTERNALS)/re2: $(EXTERNALS)
+	cd $(EXTERNALS) && \
+	curl -sL https://github.com/google/re2/archive/2016-02-01.tar.gz > re2.tar.gz && \
+  mkdir re2 && \
+  cd re2 && \
+	tar -jxf ../re2.tar.gz --strip-components=1
+
+$(EXTERNALS)/cre2: $(EXTERNALS)/re2
+	cd $(EXTERNALS) && \
+	curl -sL https://github.com/marcomaggi/cre2/archive/0.1b6.tar.gz > cre2.tar.gz && \
+  mkdir cre2 && \
+  cd cre2 && \
+	tar -jxf ../cre2.tar.gz --strip-components=1
+
+$(EXTERNALS):
+	mkdir $(EXTERNALS)
 
 run:
 	./pixie-vm
