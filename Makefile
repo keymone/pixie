@@ -38,16 +38,19 @@ compile_basics:
 	@echo -e "\n\n\n\nWARNING: Compiling core libs. If you want to modify one of these files delete the .pxic files first\n\n\n\n"
 	./pixie-vm -c pixie/uv.pxi -c pixie/io.pxi -c pixie/stacklets.pxi -c pixie/stdlib.pxi -c pixie/repl.pxi
 
-build: fetch_externals
+build: fetch_externals re2_cre2
 	$(PYTHON) $(EXTERNALS)/pypy/rpython/bin/rpython $(COMMON_BUILD_OPTS) $(JIT_OPTS) $(TARGET_OPTS)
 
-fetch_externals: $(EXTERNALS)/pypy $(EXTERNALS)/cre2 externals.fetched
+fetch_externals: $(EXTERNALS)/pypy externals.fetched
 
 externals.fetched:
 	echo https://github.com/pixie-lang/external-deps/releases/download/1.0/`uname -s`-`uname -m`.tar.bz2
 	curl -L https://github.com/pixie-lang/external-deps/releases/download/1.0/`uname -s`-`uname -m`.tar.bz2 > /tmp/externals.tar.bz2
 	tar -jxf /tmp/externals.tar.bz2 --strip-components=2
 	touch externals.fetched
+
+$(EXTERNALS):
+	mkdir $(EXTERNALS)
 
 $(EXTERNALS)/pypy: $(EXTERNALS)
 	cd $(EXTERNALS); \
@@ -59,19 +62,33 @@ $(EXTERNALS)/pypy: $(EXTERNALS)
 $(EXTERNALS)/re2: $(EXTERNALS)
 	cd $(EXTERNALS) && \
 	curl -sL https://github.com/google/re2/archive/2016-02-01.tar.gz > re2.tar.gz && \
-  mkdir re2 && \
+  mkdir -p re2 && \
   cd re2 && \
 	tar -jxf ../re2.tar.gz --strip-components=1
 
-$(EXTERNALS)/cre2: $(EXTERNALS)/re2
-	cd $(EXTERNALS) && \
-	curl -sL https://github.com/marcomaggi/cre2/archive/0.1b6.tar.gz > cre2.tar.gz && \
-  mkdir cre2 && \
-  cd cre2 && \
-	tar -jxf ../cre2.tar.gz --strip-components=1
+$(EXTERNALS)/re2/obj/libre2.a: $(EXTERNALS)/re2
+	cd $(EXTERNALS)/re2 && make
 
-$(EXTERNALS):
-	mkdir $(EXTERNALS)
+$(EXTERNALS)/cre2:
+	cd $(EXTERNALS) && \
+	curl -sL https://github.com/keymone/cre2/archive/f1157647f9ca3ef11fd6447433f36e7c7bd64d09.tar.gz > cre2.tar.xz && \
+  mkdir -p cre2 && \
+  cd cre2 && \
+	tar -jxf ../cre2.tar.xz --strip-components=1
+
+$(EXTERNALS)/cre2/build/.libs/libcre2.a: $(EXTERNALS)/cre2
+	cd $(EXTERNALS)/cre2 && \
+	LIBTOOLIZE=`env which -a libtoolize glibtoolize | head -n1` sh autogen.sh && \
+	mkdir -p build && \
+	cd build && \
+	../configure --enable-maintainer-mode LDFLAGS="-L`pwd`/../../re2/obj" CPPFLAGS="-I`pwd`/../../re2" && \
+	make
+
+re2: $(EXTERNALS)/re2/obj/libre2.a
+
+cre2: $(EXTERNALS)/cre2/build/.libs/libcre2.a
+
+re2_cre2: re2 cre2
 
 run:
 	./pixie-vm
