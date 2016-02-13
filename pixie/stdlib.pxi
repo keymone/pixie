@@ -3072,3 +3072,10 @@ ex: (vary-meta x assoc :foo 42)"
             (swap! cache assoc argsv ret)
             ret)
           val)))))
+
+(defn regexp
+  {:doc "Returns internal representation for regular
+   expression, used in matching functions."
+   :signatures [[rexegp-str opts]]}
+  [regexp-str opts]
+  (println (str regexp-str " " opts)))

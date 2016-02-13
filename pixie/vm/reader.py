@@ -648,7 +648,7 @@ class RegexReader(ReaderHandler):
             except EOFError:
                 break
 
-        return rt.cons(symbol(u"re2"), rt.cons(regex_str, rt.cons(regex_opts, nil)))
+        return rt.cons(symbol(u"regexp"), rt.cons(regex_str, rt.cons(regex_opts, nil)))
 
 dispatch_handlers = {
     u"{": SetReader(),
