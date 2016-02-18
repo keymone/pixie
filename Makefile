@@ -64,7 +64,7 @@ $(EXTERNALS)/re2: $(EXTERNALS)
 	curl -sL https://github.com/google/re2/archive/2016-02-01.tar.gz > re2.tar.gz && \
   mkdir -p re2 && \
   cd re2 && \
-	tar -jxf ../re2.tar.gz --strip-components=1
+	tar -zxf ../re2.tar.gz --strip-components=1
 
 $(EXTERNALS)/re2/obj/libre2.a: $(EXTERNALS)/re2
 	cd $(EXTERNALS)/re2 && make
@@ -74,7 +74,7 @@ $(EXTERNALS)/cre2:
 	curl -sL https://github.com/keymone/cre2/archive/f1157647f9ca3ef11fd6447433f36e7c7bd64d09.tar.gz > cre2.tar.xz && \
   mkdir -p cre2 && \
   cd cre2 && \
-	tar -jxf ../cre2.tar.xz --strip-components=1
+	tar -zxf ../cre2.tar.xz --strip-components=1
 
 $(EXTERNALS)/cre2/build/.libs/libcre2.a: $(EXTERNALS)/cre2
 	cd $(EXTERNALS)/cre2 && \
