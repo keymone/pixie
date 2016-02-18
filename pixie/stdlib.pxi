@@ -3073,13 +3073,6 @@ ex: (vary-meta x assoc :foo 42)"
             ret)
           val)))))
 
-(defn regexp
-  {:doc "Returns internal representation for regular
-   expression, used in matching functions."
-   :signatures [[rexegp-str opts]]}
-  [regexp-str opts]
-  (println (str regexp-str " " opts)))
-
 (deftype Iterate [f x]
   IReduce
   (-reduce [self rf init]
