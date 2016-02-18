@@ -68,3 +68,15 @@
    :signatures [[rexegp-str opts]]}
   [regexp-str opts]
   (cre2_new regexp-str (count regexp-str) (cre2-opts opts)))
+
+(defn match
+  [pattern text]
+  (cre2_match
+   pattern
+   text
+   (count text)
+   0
+   (count text)
+   1 ;; anchor 1 - no, 2 - start, 3 - both
+   (cre2_string_t)
+   (+ 1 (cre2_num_capturing_groups pattern))))
