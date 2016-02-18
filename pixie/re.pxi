@@ -1,4 +1,4 @@
-(ns pixie.regex
+(ns pixie.re
   (:require [pixie.ffi-infer :as i]))
 
 (i/with-config {:library "cre2"
@@ -62,12 +62,6 @@
     (doseq [key opts] ((key optmap) opt))
     opt))
 
-(defn regexp
-  {:doc "Returns internal representation for regular
-   expression, used in matching functions."
-   :signatures [[rexegp-str opts]]}
-  [regexp-str opts]
-  (cre2_new regexp-str (count regexp-str) (cre2-opts opts)))
 
 (defn match
   [pattern text]
@@ -80,3 +74,39 @@
    1 ;; anchor 1 - no, 2 - start, 3 - both
    (cre2_string_t)
    (+ 1 (cre2_num_capturing_groups pattern))))
+
+(defn regex
+  {:doc "Returns internal representation for regular
+   expression, used in matching functions."
+   :signatures [[rexeg-str opts]]}
+  [regex-str opts]
+  (re-pattern regex-str opts))
+
+(defprotocol IRegex
+  (re-matches [r s])
+  (re-find [r s]))
+
+(defrecord CRE2Regex [pattern opts]
+  IFinalize
+  (-finalize! [this]
+    (println "dropping cre2 obj " this)
+    (cre2_opt_delete opts)
+    (cre2_delete pattern))
+
+  IRegex)
+
+(def ^:dynamic *default-re-engine* :cre2)
+
+;; an "open" engine registry
+(defmulti re-engine (fn [k s o] k))
+
+;; add cre2 to registry
+(defmethod re-engine :cre2 [_ regex-str opts]
+  (let [copts (cre2-opts opts)]
+    (->CRE2Regex (cre2_new regex-str (count regex-str) copts) copts)))
+
+;; dispatch on the right engine constructor via registry
+(defn re-pattern
+  ([s o] (re-pattern s o *default-re-engine*))
+  ([s o kw] (re-engine kw s o)))
+
