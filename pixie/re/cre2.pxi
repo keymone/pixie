@@ -1,5 +1,6 @@
-(ns pixie.cre2
-  (:require [pixie.ffi-infer :as f]))
+(ns pixie.re.cre2
+  (:require [pixie.ffi-infer :as f]
+            [pixie.re :as re]))
 
 (f/with-config {:library "cre2"
                 :cxx-flags ["-Lexternals/cre2/build/.libs"
@@ -78,9 +79,10 @@
     (cre2_opt_delete opts)
     (cre2_delete pattern))
 
-  IRegex
-  (re-matches [_ text] (cre2_run_match pattern text)))
+  re/IRegex
+  (re/re-matches [_ text] (cre2_run_match pattern text)))
 
-(defn make-re [pattern opts]
+;; add cre2 to registry
+(defmethod re/re-engine :cre2 [_ regex-str opts]
   (let [copts (cre2_make_opts opts)]
     (->CRE2Regex (cre2_new regex-str (count regex-str) copts) copts)))
