@@ -62,6 +62,7 @@ $(EXTERNALS)/pypy: $(EXTERNALS)
 $(EXTERNALS)/re2: $(EXTERNALS)
 	cd $(EXTERNALS) && \
 	curl -sL https://github.com/google/re2/archive/2016-02-01.tar.gz > re2.tar.gz && \
+	shasum -a 256 cre2.tar.xz | grep -q f246c43897ac341568a7460622138ec0dd8de9b6f5459686376fa23e9d8c1bb8 && \
   mkdir -p re2 && \
   cd re2 && \
 	tar -zxf ../re2.tar.gz --strip-components=1
@@ -69,19 +70,20 @@ $(EXTERNALS)/re2: $(EXTERNALS)
 $(EXTERNALS)/re2/obj/libre2.a: $(EXTERNALS)/re2
 	cd $(EXTERNALS)/re2 && make
 
-$(EXTERNALS)/cre2:
+$(EXTERNALS)/cre2: $(EXTERNALS)
 	cd $(EXTERNALS) && \
-	curl -sL https://github.com/keymone/cre2/archive/f1157647f9ca3ef11fd6447433f36e7c7bd64d09.tar.gz > cre2.tar.xz && \
+	curl -sL https://bitbucket.org/marcomaggi/cre2/downloads/cre2-0.2.0.tar.xz > cre2.tar.xz && \
+  shasum -a 256 cre2.tar.xz | grep -q d31118dbc9d2b1cf95c1b763ca92ae2ec4e262b1f8d8e995c1ffdc8eb40a82fc && \
   mkdir -p cre2 && \
   cd cre2 && \
 	tar -zxf ../cre2.tar.xz --strip-components=1
 
 $(EXTERNALS)/cre2/build/.libs/libcre2.a: $(EXTERNALS)/cre2
 	cd $(EXTERNALS)/cre2 && \
-	LIBTOOLIZE=`env which -a libtoolize glibtoolize | head -n1` sh autogen.sh && \
 	mkdir -p build && \
 	cd build && \
-	../configure --enable-maintainer-mode LDFLAGS="-L`pwd`/../../re2/obj" CPPFLAGS="-I`pwd`/../../re2" && \
+	../configure LDFLAGS="-L`pwd`/../../re2/obj" CPPFLAGS="-I`pwd`/../../re2" && \
+  chmod +x ../meta/autotools/install-sh && \
 	make
 
 re2: $(EXTERNALS)/re2/obj/libre2.a
@@ -92,7 +94,6 @@ re2_cre2: re2 cre2
 
 run:
 	./pixie-vm
-
 
 run_interactive:
 	@PYTHONPATH=$(PYTHONPATH) $(PYTHON) target.py
