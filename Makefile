@@ -62,7 +62,7 @@ $(EXTERNALS)/pypy: $(EXTERNALS)
 $(EXTERNALS)/re2: $(EXTERNALS)
 	cd $(EXTERNALS) && \
 	curl -sL https://github.com/google/re2/archive/2016-02-01.tar.gz > re2.tar.gz && \
-	shasum -a 256 cre2.tar.xz | grep -q f246c43897ac341568a7460622138ec0dd8de9b6f5459686376fa23e9d8c1bb8 && \
+	shasum -a 256 re2.tar.gz | grep -q f246c43897ac341568a7460622138ec0dd8de9b6f5459686376fa23e9d8c1bb8 && \
   mkdir -p re2 && \
   cd re2 && \
 	tar -zxf ../re2.tar.gz --strip-components=1
