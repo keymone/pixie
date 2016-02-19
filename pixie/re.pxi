@@ -46,7 +46,7 @@
   (i/defcfn cre2_strings_to_ranges)
 )
 
-(def optmap
+(def cre2_optmap
   { :ascii #(cre2_set_encoding % 2)
     :posix #(cre2_opt_set_posix_syntax % 1)
     :longest_match #(cre2_opt_set_longest_match % 1)
@@ -57,43 +57,32 @@
     :never_capture #(do %) ;; ??
     :ignore_case #(cre2_opt_set_case_sensitive % 0) })
 
-(defn- cre2-opts [opts]
+(defn cre2_make_opts [opts]
   (let [opt (cre2_opt_new)]
-    (doseq [key opts] ((key optmap) opt))
+    (doseq [key opts] ((key cre2_optmap) opt))
     opt))
 
-
-(defn match
+(defn cre2_run_match
   [pattern text]
-  (cre2_match
-   pattern
-   text
-   (count text)
-   0
-   (count text)
-   1 ;; anchor 1 - no, 2 - start, 3 - both
-   (cre2_string_t)
-   (+ 1 (cre2_num_capturing_groups pattern))))
-
-(defn regex
-  {:doc "Returns internal representation for regular
-   expression, used in matching functions."
-   :signatures [[rexeg-str opts]]}
-  [regex-str opts]
-  (re-pattern regex-str opts))
+  (= 1
+     (cre2_match pattern
+        text (count text)
+        0 (count text)
+        1 ;; anchor 1 - no, 2 - start, 3 - both
+        (cre2_string_t)
+        (+ 1 (cre2_num_capturing_groups pattern)))))
 
 (defprotocol IRegex
-  (re-matches [r s])
-  (re-find [r s]))
+  (re-matches [r t]))
 
-(defrecord CRE2Regex [pattern opts]
+(deftype CRE2Regex [pattern opts]
   IFinalize
   (-finalize! [this]
-    (println "dropping cre2 obj " this)
     (cre2_opt_delete opts)
     (cre2_delete pattern))
 
-  IRegex)
+  IRegex
+  (re-matches [_ text] (cre2_run_match pattern text)))
 
 (def ^:dynamic *default-re-engine* :cre2)
 
@@ -102,11 +91,12 @@
 
 ;; add cre2 to registry
 (defmethod re-engine :cre2 [_ regex-str opts]
-  (let [copts (cre2-opts opts)]
+  (let [copts (cre2_make_opts opts)]
     (->CRE2Regex (cre2_new regex-str (count regex-str) copts) copts)))
 
-;; dispatch on the right engine constructor via registry
-(defn re-pattern
-  ([s o] (re-pattern s o *default-re-engine*))
-  ([s o kw] (re-engine kw s o)))
-
+(defn regex
+  {:doc "Returns internal representation for regular
+   expression, used in matching functions."
+   :signatures [[rexeg-str opts]]}
+  ([pattern opts] (regex pattern opts *default-re-engine*))
+  ([pattern opts engine] (re-engine engine pattern opts)))
