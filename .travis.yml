@@ -1,7 +1,4 @@
 language: cpp
-compiler:
-  - g++
-  - clang
 
 sudo: false
 env:
@@ -9,7 +6,10 @@ env:
   - JIT_OPTS='' TARGET_OPTS='target.py'
 
 matrix:
-  fast_finish: true 
+  fast_finish: true
+
+install:
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
 
 script:
   - make PYTHON=python build
@@ -19,12 +19,16 @@ script:
 
 addons:
   apt:
+    sources:
+    - ubuntu-toolchain-r-test
     packages:
-      - libffi-dev
-      - libedit-dev
-      - libboost-all-dev
-      - zlib1g-dev
-      - zlib-bin
+    - libffi-dev
+    - libedit-dev
+    - libboost-all-dev
+    - zlib1g-dev
+    - zlib-bin
+    - gcc-4.8
+    - g++-4.8
 
 notifications:
   irc: "chat.freenode.net#pixie-lang"
