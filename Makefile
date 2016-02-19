@@ -66,7 +66,7 @@ $(EXTERNALS)/re2: $(EXTERNALS)
   mkdir -p re2 && \
   cd re2 && \
 	tar -zxf ../re2.tar.gz --strip-components=1 && \
-	make
+	make CPPFLAGS="-fPIC"
 
 $(EXTERNALS)/cre2: $(EXTERNALS)
 	cd $(EXTERNALS) && \
