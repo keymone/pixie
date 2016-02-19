@@ -36,7 +36,7 @@ build_no_jit_shared: fetch_externals re2_cre2
 
 compile_basics:
 	@echo -e "\n\n\n\nWARNING: Compiling core libs. If you want to modify one of these files delete the .pxic files first\n\n\n\n"
-	./pixie-vm -c pixie/uv.pxi -c pixie/io.pxi -c pixie/stacklets.pxi -c pixie/stdlib.pxi -c pixie/repl.pxi -c pixie/re.pxi
+	./pixie-vm -c pixie/uv.pxi -c pixie/io.pxi -c pixie/stacklets.pxi -c pixie/stdlib.pxi -c pixie/repl.pxi -c pixie/re.pxi -c pixie/re/cre2.pxi
 
 build: fetch_externals re2_cre2
 	$(PYTHON) $(EXTERNALS)/pypy/rpython/bin/rpython $(COMMON_BUILD_OPTS) $(JIT_OPTS) $(TARGET_OPTS)
