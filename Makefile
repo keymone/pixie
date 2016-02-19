@@ -78,12 +78,16 @@ $(EXTERNALS)/cre2: $(EXTERNALS)
 	mkdir -p build && \
 	cd build && \
 	../configure LDFLAGS="-L`pwd`/../../re2/obj" CPPFLAGS="-I`pwd`/../../re2" && \
-  chmod +x ../meta/autotools/install-sh && \
+	chmod +x ../meta/autotools/install-sh && \
 	make
 
 re2: $(EXTERNALS)/re2
 
 cre2: $(EXTERNALS)/cre2
+	mkdir -p lib/ include/ && \
+	ln -sf ../$(EXTERNALS)/cre2/src/cre2.h include/ && \
+  cd lib && \
+	ln -sf ../$(EXTERNALS)/cre2/build/.libs/* ./
 
 re2_cre2: re2 cre2
 
