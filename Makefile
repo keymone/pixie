@@ -76,7 +76,7 @@ $(EXTERNALS)/cre2: $(EXTERNALS)
   shasum -a 256 cre2.tar.xz | grep -q d31118dbc9d2b1cf95c1b763ca92ae2ec4e262b1f8d8e995c1ffdc8eb40a82fc && \
   mkdir -p cre2 && \
   cd cre2 && \
-	tar -zxf ../cre2.tar.xz --strip-components=1
+	tar -Jxf ../cre2.tar.xz --strip-components=1
 
 $(EXTERNALS)/cre2/build/.libs/libcre2.a: $(EXTERNALS)/cre2
 	cd $(EXTERNALS)/cre2 && \
