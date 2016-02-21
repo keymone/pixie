@@ -648,7 +648,7 @@ class RegexReader(ReaderHandler):
             except EOFError:
                 break
 
-        return rt.cons(symbol(u"pixie.re/regex"),
+        return rt.cons(symbol(u"pixie.stdlib/re-pattern"),
                        rt.cons(regex_str, rt.cons(regex_opts, nil)))
 
 dispatch_handlers = {

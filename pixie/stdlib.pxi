@@ -3092,3 +3092,5 @@ ex: (vary-meta x assoc :foo 42)"
    :added "0.1"}
   [f x]
   (->Iterate f x))
+
+(load-ns 'pixie.re)
