@@ -43,7 +43,7 @@
   (f/defcfn cre2_strings_to_ranges)
 )
 
-(def cre2_optmap
+(def cre2-optmap
   { :ascii #(cre2_set_encoding % 2)
     :posix #(cre2_opt_set_posix_syntax % 1)
     :longest_match #(cre2_opt_set_longest_match % 1)
@@ -54,20 +54,33 @@
     :never_capture #(do %) ;; ??
     :ignore_case #(cre2_opt_set_case_sensitive % 0) })
 
-(defn cre2_make_opts [opts]
+(defn cre2-make-opts [opts]
   (let [opt (cre2_opt_new)]
-    (doseq [key opts] ((key cre2_optmap) opt))
+    (doseq [key opts] ((key cre2-optmap) opt))
     opt))
 
-(defn cre2_run_match
+(defn cre2-make-match-array [size]
+  (cre2_string_t))
+
+(defn cre2-delete-match-array [arr size]
+  )
+
+(defn cre2-matches-to-seq [matches size]
+  (repeat size true))
+
+(defn cre2-matches
   [pattern text]
-  (= 1
-     (cre2_match pattern
-        text (count text)
-        0 (count text)
-        1 ;; anchor 1 - no, 2 - start, 3 - both
-        (cre2_string_t)
-        (+ 1 (cre2_num_capturing_groups pattern)))))
+  (let [text-size (count text)
+        match-arr-size (+ 1 (cre2_num_capturing_groups pattern))
+        match-arr (cre2-make-match-array match-arr-size)
+        result (cre2_match pattern
+                 text text-size 0 text-size 1
+                 match-arr match-arr-size)]
+    (if (= 1 result)
+      (let [match-seq (cre2-matches-to-seq match-arr match-arr-size)]
+        (cre2-delete-match-array match-arr match-arr-size)
+        match-seq)
+      nil)))
 
 (deftype CRE2Regex [pattern opts]
   IFinalize
@@ -76,9 +89,9 @@
     (cre2_delete pattern))
 
   IRegex
-  (pixie.stdlib/re-matches [_ text] (cre2_run_match pattern text)))
+  (pixie.stdlib/re-matches [_ text] (cre2-matches pattern text)))
 
 ;; add cre2 to registry
 (defmethod pixie.stdlib/re-engine 'pixie.re.cre2 [_ regex-str opts]
-  (let [copts (cre2_make_opts opts)]
+  (let [copts (cre2-make-opts opts)]
     (->CRE2Regex (cre2_new regex-str (count regex-str) copts) copts)))
