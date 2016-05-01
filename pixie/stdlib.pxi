@@ -17,6 +17,10 @@
 (def srand (ffi-fn libc "srand" [CInt] CInt))
 (def fopen (ffi-fn libc "fopen" [CCharP CCharP] CVoidP))
 (def fread (ffi-fn libc "fread" [CVoidP CInt CInt CVoidP] CInt))
+(def mkdtemp (ffi-fn libc "mkdtemp" [CCharP] CCharP))
+(def mkdir (ffi-fn libc "mkdir" [CCharP] CCharP))
+(def rmdir (ffi-fn libc "rmdir" [CCharP] CCharP))
+(def rm (ffi-fn libc "remove" [CCharP] CCharP))
 
 (def libm (ffi-library (str "libm." pixie.platform/so-ext)))
 (def atan2 (ffi-fn libm "atan2" [CDouble CDouble] CDouble))
@@ -899,7 +903,7 @@ If further arguments are passed, invokes the method named by symbol, passing the
     (if (next coll)
       (recur (next coll))
       (first coll))
-    
+
     (satisfies? ISeqable coll)
     (recur (seq coll))))
 
@@ -2102,7 +2106,7 @@ For more information, see http://clojure.org/special_forms#binding-forms"}
         val
        not-found)))
   ISeq
-  (-first [this] 
+  (-first [this]
     (when (not= start stop)
       start))
   (-next  [this]
@@ -3076,11 +3080,11 @@ ex: (vary-meta x assoc :foo 42)"
 (deftype Iterate [f x]
   IReduce
   (-reduce [self rf init]
-    (loop [col (rest self) 
-           acc (rf init (first self))]
+    (loop [next (f x)
+           acc (rf init x)]
       (if (reduced? acc)
         @acc
-        (recur (rest col) (rf acc (first col))))))
+        (recur (f next) (rf acc next)))))
   ISeq
   (-seq [self]
     (cons x (lazy-seq* (fn [] (->Iterate f (f x)))))))
